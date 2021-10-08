@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import client from '../../lib/client'
 
 const Signin = ({ onRouteChange, loadUser }) => {
   const [signInEmail, setSignInEmail] = useState('')
@@ -12,21 +13,16 @@ const Signin = ({ onRouteChange, loadUser }) => {
     setSignInPassword(e.target.value)
   }
 
-  const onSubmitSignIn = () => {
-    fetch('http://localhost:3001/signin', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email: signInEmail, password: signInPassword })
+  const onSubmitSignIn = async () => {
+    const response = await client.post('/signin', {
+      email: signInEmail,
+      password: signInPassword
     })
-      .then(res => res.json())
-      .then(user => {
-        if (user.id) {
-          loadUser(user)
-          onRouteChange('home')
-        } 
-      })
+
+    if (response.id) {
+      loadUser(response)
+      onRouteChange('home')
+    }
   }
 
   return (

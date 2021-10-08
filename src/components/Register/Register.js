@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import client from '../../lib/client'
 
 const Register = ({ onRouteChange, loadUser }) => {
   const [email, setEmail] = useState('')
@@ -17,21 +18,13 @@ const Register = ({ onRouteChange, loadUser }) => {
     setName(e.target.value)
   }
 
-  const onSubmitRegister = () => {
-    fetch('http://localhost:3001/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password, name })
-    })
-      .then(res => res.json())
-      .then(user => {
-        if (user.id) {
-          loadUser(user)
-          onRouteChange('home')
-        } 
-      })
+  const onSubmitRegister = async () => {
+    const response = await client.post('/register', { email, password, name })
+
+    if (response.id) {
+      loadUser(response)
+      onRouteChange('home')
+    }
   }
 
   return (

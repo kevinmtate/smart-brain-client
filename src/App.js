@@ -8,6 +8,7 @@ import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 import Signin from './components/Signin/Signin';
 import Register from './components/Register/Register';
 import Particles from 'react-particles-js';
+import client from './lib/client'
 
 const particlesOptions = {
   particles: {
@@ -79,30 +80,16 @@ class App extends Component {
 
   onButtonSubmit = () => {
     this.setState({ imageUrl: this.state.input });
-    fetch('http://localhost:3001/imageurl', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        input: this.state.input
+    client.post('/imageurl', { input: this.state.input })
+      .then(res => {
+        if (res) {
+          client.put('/image', { id: this.state.user.id })
+            .then(count => this.setState({ user: { ...this.state.user, entries: count } }))
+            .catch(console.log)
+        }
+        this.displayFaceBox(this.calculateFaceLocation(res))
       })
-    })
-    .then(res => res.json())
-    .then(res => {
-      if (res) {
-        fetch('http://localhost:3001/image', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            id: this.state.user.id
-          })
-        })
-          .then(res => res.json())
-          .then(count => this.setState({ user: { ...this.state.user, entries: count } }))
-          .catch(console.log)
-      }
-      this.displayFaceBox(this.calculateFaceLocation(res))
-    })
-    .catch(console.log)
+      .catch(console.error)
   }
 
   onRouteChange = (route) => {
